@@ -39,6 +39,11 @@
 #include "ekf.h"
 #include <mathlib/mathlib.h>
 
+// VIO Missions
+// Collects mag data to get a avg heading to be used in the NED frame
+// Then shuts down mag fusion as it will create wild drifts depending on location and
+// theres logic that shuts down EV_YAW control.
+// TODO: fix ev yaw control WITH mag fusion.
 void Ekf::get_NED_heading(float mag_value)
 {
     // if MAG is turned on, we need to realign the EV space from FRD to NED
@@ -122,6 +127,7 @@ void Ekf::controlMagFusion()
 			_aid_src_mag_heading.observation = -atan2f(mag_earth_pred(1), mag_earth_pred(0)) + getMagDeclination();
 			_aid_src_mag_heading.innovation = wrap_pi(getEulerYaw(_R_to_earth) - _aid_src_mag_heading.observation);
 
+			// VIO missions, collect data at power up
 			if (rotate_ev_to_ned && !has_ev_heading_ned)
 				get_NED_heading( _aid_src_mag_heading.observation);
 

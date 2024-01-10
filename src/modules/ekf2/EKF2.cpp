@@ -473,6 +473,7 @@ void EKF2::Run()
 		}
 	}
 
+	// enable vio missions using the takeoff point as the HOME position in global NED space
 	if (_vehicle_command_sub.updated()) {
 		vehicle_command_s vehicle_command;
 
@@ -494,10 +495,17 @@ void EKF2::Run()
 						_instance, latitude, longitude, static_cast<double>(altitude));
 				}
 
-				PX4_WARN("Forcing global YAW for origin!");
+				PX4_WARN("Reset global YAW for new origin!");
 				// TODO fix EV yaw value as it becomes used as global not local.
-				//PX4_WARN("Attempting to reset EKF global Yaw rotation to %f", (double)vehicle_command.param4);
+				if (vehicle_command.param4 < -10)
+				{
+					PX4_WARN("Attempting to reset EKF global Yaw rotation to %f", (double)vehicle_command.param4);
+					_ekf.avg_mag_heading = vehicle_command.param4;   // TODO make get/setter for this attribute
+				}
+
 				_ekf.forceResetQuatStateYaw();
+				// TODO fix EV yaw value as it becomes used as global not local.
+
 			}
 		}
 	}

@@ -506,11 +506,20 @@ public:
 	const auto &aid_src_aux_vel() const { return _aid_src_aux_vel; }
 #endif // CONFIG_EKF2_AUXVEL
 
+	// VIO missions
+
+	// Is mag exists and mag_type is none use mag value to set the orientation of the
+	// vehicle in global space NED
 	bool has_ev_heading_ned = false;
+
+	// Global space NED heading
 	float avg_mag_heading = 0.0;
+
+	// Used to get a avgerage value of heading from the mag if present
 	bool rotate_ev_to_ned = false;
 	bool last_rotate_ev_to_ned = false;
 
+	// Activate
 	bool enable_NED_convert(bool enabled)
 	{
 		bool state_changed = false;
@@ -525,9 +534,14 @@ public:
 		return state_changed;
 
 	};
+
+	// get avg mag value as global heading
 	void get_NED_heading(float mag_value);
+
+	// update VIO data to NED space
 	void set_NED_heading(extVisionSample &ev_sample);
 
+	// reset heading to NED space
 	void forceResetQuatStateYaw()
 	{
 		resetQuatStateYaw( avg_mag_heading,  0);

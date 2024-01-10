@@ -1403,6 +1403,13 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 			mission_item->nav_cmd = NAV_CMD_TAKEOFF;
 			mission_item->yaw = wrap_2pi(math::radians(mavlink_mission_item->param4));
 
+			// TODO may want to just have a new PX4 param to globally rule them all on this feature vs
+			// looking at has nag and ev_ctrl
+
+			// VIO missions /////////////////////////////////////////////////
+
+			// enable vio missions using the takeoff point as the HOME position in global NED space
+			// This enable user to trigger this feature either thru UI or programatically
 			int32_t gps_enabled = 0;
 			int32_t ev_enabled = 0;
 			param_get(param_find("SYS_HAS_GPS"), &gps_enabled);
@@ -1411,7 +1418,7 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 			if (!gps_enabled && ev_enabled >= 9)
 			{
 				if (!(mission_item->yaw >=0 && mission_item->yaw < (float)(2 * M_PI_PRECISE))) {
-					mission_item->yaw = 0.0; // north FRD space!
+					mission_item->yaw = -99.0;
 				}
 
 				PX4_WARN("GPS DISABLED, Using Takeoff as HOME:");
@@ -1459,6 +1466,8 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 				PX4_ERR("NEW  Home: %f %f %f", (double)home_position.lat, (double)home_position.lon, (double)home_position.alt);
 				*/
 			}
+
+			///////////////////////////////////////
 
 			break;
 		}

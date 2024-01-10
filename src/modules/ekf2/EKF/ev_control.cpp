@@ -41,13 +41,20 @@
 
 static const Vector3f z_unit(0.f, 0.f, 1.f);
 
+// VIO missions convert incomin EV FRD data.
 void Ekf::set_NED_heading(extVisionSample &ev_sample)
 {
+
+	// TODO may need a if block if VIO data comes in NON-FRD, which is unlikely.
+
+	// Put heading and position in local NED space
     ev_sample.quat.rotate(AxisAnglef(z_unit, avg_mag_heading));
     matrix::Dcmf rot = matrix::Dcmf{matrix::Eulerf{0.f, 0.f, avg_mag_heading}};
     ev_sample.pos = rot * ev_sample.pos;
     ev_sample. position_var = rot * ev_sample.position_var;
     ev_sample.pos_frame = PositionFrame::LOCAL_FRAME_NED;
+
+    // TODO why does velocity ignore NED frame if set--it always prcoesses in BODY frame
 }
 
 void Ekf::controlExternalVisionFusion()
@@ -66,7 +73,7 @@ void Ekf::controlExternalVisionFusion()
 				set_NED_heading(ev_sample);
 			}
 			else
-				return;
+				return;   // Don't inject bad data into EKF solution triggering preflight errors.
 		}
 
 		bool ev_reset = (ev_sample.reset_counter != _ev_sample_prev.reset_counter);
