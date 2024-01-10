@@ -1403,8 +1403,8 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 			mission_item->nav_cmd = NAV_CMD_TAKEOFF;
 			mission_item->yaw = wrap_2pi(math::radians(mavlink_mission_item->param4));
 
-			int gps_enabled = 0;
-			int ev_enabled = 0;
+			int32_t gps_enabled = 0;
+			int32_t ev_enabled = 0;
 			param_get(param_find("SYS_HAS_GPS"), &gps_enabled);
 			param_get(param_find("EKF2_EV_CTRL"), &ev_enabled);
 
@@ -1444,16 +1444,20 @@ MavlinkMissionManager::parse_mavlink_mission_item(const mavlink_mission_item_t *
 				// need to wait until EKF updates
 				uORB::Subscription g_pos_sub{ORB_ID(vehicle_global_position)};
 				vehicle_global_position_s		g_pos{};			/**< global vehicle position */
-				while(g_pos.lat < 1e-5 && g_pos.lon < 1e-5 && g_pos.alt < 1e-5f)
+				while(g_pos.lat < 1e-6 && g_pos.lon < 1e-6 && g_pos.alt < 1e-6f)
 				{
 					g_pos_sub.update(&g_pos);
+					usleep(2);
 				}
 
+				/*
+				 * TODO: may not be needed
 				uORB::Subscription	_home_position_sub{ORB_ID(home_position)};
 				// set and send home position
 				home_position_s home_position{};
 				_home_position_sub.copy(&home_position);
 				PX4_ERR("NEW  Home: %f %f %f", (double)home_position.lat, (double)home_position.lon, (double)home_position.alt);
+				*/
 			}
 
 			break;

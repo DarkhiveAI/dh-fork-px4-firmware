@@ -38,6 +38,18 @@
 
 #include "ekf.h"
 
+
+static const Vector3f z_unit(0.f, 0.f, 1.f);
+
+void Ekf::set_NED_heading(extVisionSample &ev_sample)
+{
+    ev_sample.quat.rotate(AxisAnglef(z_unit, avg_mag_heading));
+    matrix::Dcmf rot = matrix::Dcmf{matrix::Eulerf{0.f, 0.f, avg_mag_heading}};
+    ev_sample.pos = rot * ev_sample.pos;
+    ev_sample. position_var = rot * ev_sample.position_var;
+    ev_sample.pos_frame = PositionFrame::LOCAL_FRAME_NED;
+}
+
 void Ekf::controlExternalVisionFusion()
 {
 	_ev_pos_b_est.predict(_dt_ekf_avg);
@@ -46,6 +58,16 @@ void Ekf::controlExternalVisionFusion()
 	extVisionSample ev_sample;
 
 	if (_ext_vision_buffer && _ext_vision_buffer->pop_first_older_than(_time_delayed_us, &ev_sample)) {
+
+		if (rotate_ev_to_ned)
+		{
+			if (has_ev_heading_ned)
+			{
+				set_NED_heading(ev_sample);
+			}
+			else
+				return;
+		}
 
 		bool ev_reset = (ev_sample.reset_counter != _ev_sample_prev.reset_counter);
 

@@ -443,6 +443,16 @@ void EKF2::Run()
 				}
 			}
 		}
+
+		// if mag is being used we must convert ev data to NED
+		int32_t has_mag = 0;
+		int32_t mag_used = 0;
+		param_get(param_find("SYS_HAS_MAG"), &has_mag);
+		param_get(param_find("EKF2_MAG_TYPE"), &mag_used);
+		mag_used = has_mag && (mag_used == 5);
+		if (_ekf.enable_NED_convert(mag_used))
+			_preflt_checker.reset();
+
 	}
 
 	if (!_callback_registered) {
@@ -484,8 +494,10 @@ void EKF2::Run()
 						_instance, latitude, longitude, static_cast<double>(altitude));
 				}
 
+				PX4_WARN("Forcing global YAW for origin!");
 				// TODO fix EV yaw value as it becomes used as global not local.
-				_ekf.forceResetQuatStateYaw(vehicle_command.param4, 0.0);
+				//PX4_WARN("Attempting to reset EKF global Yaw rotation to %f", (double)vehicle_command.param4);
+				_ekf.forceResetQuatStateYaw();
 			}
 		}
 	}

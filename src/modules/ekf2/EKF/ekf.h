@@ -506,26 +506,39 @@ public:
 	const auto &aid_src_aux_vel() const { return _aid_src_aux_vel; }
 #endif // CONFIG_EKF2_AUXVEL
 
-	// offset for ev data  aif ev data is only used for position estimation in global NED
-	// basically the yaw value for _R_to_Earth
-	float ev_yaw_offset_2_G_NED = 0.0f;
+	bool has_ev_heading_ned = false;
+	float avg_mag_heading = 0.0;
+	bool rotate_ev_to_ned = false;
+	bool last_rotate_ev_to_ned = false;
 
-	// handle non-gps control in the global coordinate system, NED
-	void forceResetQuatStateYaw(float yaw, float yaw_variance)
+	bool enable_NED_convert(bool enabled)
 	{
-		resetQuatStateYaw( yaw,  yaw_variance);
-		ev_yaw_offset_2_G_NED = yaw;
+		bool state_changed = false;
+		rotate_ev_to_ned = enabled;
 
+		if (last_rotate_ev_to_ned != rotate_ev_to_ned)
+		{
+			last_rotate_ev_to_ned = rotate_ev_to_ned;
+			state_changed = true;
+		}
+
+		return state_changed;
+
+	};
+	void get_NED_heading(float mag_value);
+	void set_NED_heading(extVisionSample &ev_sample);
+
+	void forceResetQuatStateYaw()
+	{
+		resetQuatStateYaw( avg_mag_heading,  0);
 		// Reset global yaw by user input
 		// TODO This is experimental!
 		/////////////////////////////////////
-		_R_to_earth = updateYawInRotMat(yaw, Dcmf(_state.quat_nominal));
-		_state.quat_nominal = _R_to_earth;
-		// reset the output predictor state history to match the EKF initial values
-		_output_predictor.alignOutputFilter(_state.quat_nominal, _state.vel, _state.pos);
-
-		/////////////////////////////////////
-
+//		_R_to_earth = updateYawInRotMat(avg_mag_heading, Dcmf(_state.quat_nominal));
+//		_state.quat_nominal = _R_to_earth;
+//		// reset the output predictor state history to match the EKF initial values
+//		_output_predictor.alignOutputFilter(_state.quat_nominal, _state.vel, _state.pos);
+//		/////////////////////////////////////
 	}
 
 private:
