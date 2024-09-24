@@ -143,6 +143,7 @@ set(msg_files
 	ParameterClientResetResponse.msg
 	ParameterClientSetValueRequest.msg
 	ParameterClientSetValueResponse.msg
+	ParameterSelector.msg
 	ParameterServerSetUsedResponse.msg
 	ParameterServerSetUsedRequest.msg
 	ParameterServerSetValueRequest.msg
