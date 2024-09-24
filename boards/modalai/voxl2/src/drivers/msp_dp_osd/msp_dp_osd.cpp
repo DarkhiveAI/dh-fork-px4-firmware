@@ -322,8 +322,6 @@ void MspDPOsd::Run()
 		this->Send(MSP_BATTERY_STATE, &msg);
 	}
 
-
-
 	// GPS LAT/LONG
 	{
 		sensor_gps_s vehicle_gps_position{};

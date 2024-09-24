@@ -59,7 +59,6 @@
 #include <uORB/topics/esc_status.h>
 #include <uORB/topics/parameter_selector.h>
 #include <uORB/topics/manual_control_setpoint.h>
-#include <uORB/topics/vehicle_odometry.h>
 #include <uORB/topics/mavlink_tunnel.h>
 
 #include "MspDPV1.hpp"
@@ -147,7 +146,6 @@ private:
 	uORB::Subscription _esc_status_sub{ORB_ID(esc_status)};
 	uORB::Subscription _parameter_selector_sub{ORB_ID(parameter_selector)};
 	uORB::Subscription _manual_control_setpoint_sub{ORB_ID(manual_control_setpoint)};
-	uORB::Subscription _vehicle_visual_odometry_sub{ORB_ID(vehicle_visual_odometry)};
 
 	uORB::SubscriptionCallbackWorkItem _vehicle_mavlink_tunnel_sub{this, ORB_ID(mavlink_tunnel)};
 
