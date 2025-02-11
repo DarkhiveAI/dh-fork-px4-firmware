@@ -189,20 +189,19 @@ MulticopterRateControl::Run()
 			if (_manual_control_setpoint_sub.update(&manual_control_setpoint)) {
 				// manual rates control - ACRO mode
 				Vector2f rp_sp{0, 0};
-				if (_param_mc_acro_expo_x5.get()) {
-					Vector2f rp_stick{manual_control_setpoint.roll, -manual_control_setpoint.pitch};
-					float rp_stick_len = rp_stick.length();
-					if (rp_stick_len > 1.0f) {
-						rp_stick.normalize();
-						rp_stick_len = 1.0f;
-					}
-					if (rp_stick_len > FLT_EPSILON) {
+				Vector2f rp_stick{manual_control_setpoint.roll, -manual_control_setpoint.pitch};
+				float rp_stick_len = rp_stick.length();
+				if (rp_stick_len > 1.0f) {
+					rp_stick.normalize();
+					rp_stick_len = 1.0f;
+				}
+				if (rp_stick_len > FLT_EPSILON) {
+					if (_param_mc_acro_expo_x5.get()) {
 						// Apply expo to magnitude of roll and pitch as a 2d vector for correct direction and scale around the circle
 						rp_sp = rp_stick.unit() * math::superexpo_x5(rp_stick_len, _param_mc_acro_expo.get(), _param_mc_acro_supexpo.get());
+					} else {
+						rp_sp = rp_stick.unit() * math::superexpo(rp_stick_len, _param_mc_acro_expo.get(), _param_mc_acro_supexpo.get());
 					}
-				} else {
-					rp_sp(0) = math::superexpo(manual_control_setpoint.roll, _param_mc_acro_expo.get(), _param_mc_acro_supexpo.get());
-					rp_sp(1) = math::superexpo(-manual_control_setpoint.pitch, _param_mc_acro_expo.get(), _param_mc_acro_supexpo.get());
 				}
 
 				const Vector3f man_rate_sp{
