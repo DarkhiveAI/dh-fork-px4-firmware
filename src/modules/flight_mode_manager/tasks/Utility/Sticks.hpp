@@ -73,6 +73,15 @@ public:
 	float getThrottleZeroCenteredExpo() const { return -_positions_expo(2); }
 	const matrix::Vector2f getPitchRoll() { return _positions.slice<2, 1>(0, 0); }
 	const matrix::Vector2f getPitchRollExpo() { return _positions_expo.slice<2, 1>(0, 0); }
+	/**
+	 * @brief Get Pitch and Roll expo calculated on 2d vector length to maintain direction
+	 *  and provide circular consistency in magnitude. This is more correct and results in
+	 *  a nicer pilot feel than applying the exponential function to the pitch and roll
+	 *  vector components independently.
+	 *
+	 * @return const matrix::Vector2f
+	 */
+	const matrix::Vector2f getPitchRollExpoX5() { return _positions_pr_expo_x5; }
 
 	/**
 	 * Limit the the horizontal input from a square shaped joystick gimbal to a unit circle
@@ -92,6 +101,7 @@ private:
 	bool _input_available{false};
 	matrix::Vector4f _positions; ///< unmodified manual stick inputs
 	matrix::Vector4f _positions_expo; ///< modified manual sticks using expo function
+	matrix::Vector2f _positions_pr_expo_x5; ///< only pitch and roll as 2D vector using expo x5 function
 
 	uORB::Subscription _manual_control_setpoint_sub{ORB_ID(manual_control_setpoint)};
 	uORB::Subscription _failsafe_flags_sub{ORB_ID(failsafe_flags)};
